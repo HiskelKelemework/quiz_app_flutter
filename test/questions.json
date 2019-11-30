@@ -1,0 +1,39 @@
+[
+    {
+        "question": "Which of the following sorting algorithms is the fastest?",
+        "options": [
+            "a) Merge sort",
+            "b) Quick sort",
+            "c) Insertion sort",
+            "d) Shell sort"
+        ],
+        "is_multiple_choice": false,
+        "answers": [
+            1
+        ]
+    },
+    {
+        "question": "Quick sort follows Divide-and-Conquer strategy.",
+        "options": [
+            "a) True",
+            "b) False"
+        ],
+        "is_multiple_choice": false,
+        "answers": [
+            0
+        ]
+    },
+    {
+        "question": "What is the worst case time complexity of a quick sort algorithm?",
+        "options": [
+            "a) O(N)",
+            "b) O(N log N)",
+            "c) O(N2)",
+            "d) O(log N)"
+        ],
+        "is_multiple_choice": false,
+        "answers": [
+            2
+        ]
+    }
+]
