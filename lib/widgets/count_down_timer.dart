@@ -33,6 +33,11 @@ class _CountDownTimerState extends State<CountDownTimer> {
 
   @override
   void initState() {
+    _startTimer();
+    super.initState();
+  }
+
+  void _startTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
@@ -41,6 +46,7 @@ class _CountDownTimerState extends State<CountDownTimer> {
           if (sec == 0 && min == 0) {
             _timer.cancel();
             // callback here if needed
+            widget.onCountDownFinish();
           }
 
           if (sec == -1 && min > 0) {
@@ -50,7 +56,6 @@ class _CountDownTimerState extends State<CountDownTimer> {
         });
       }
     });
-    super.initState();
   }
 
   @override
