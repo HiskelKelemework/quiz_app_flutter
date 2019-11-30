@@ -8,7 +8,6 @@ import '../widgets/question.dart';
 
 import '../models/question.dart';
 
-enum ButtonState { check, proceed }
 enum QuestionBankState { notLoaded, loaded, failed }
 
 class QuestionPage extends StatefulWidget {
@@ -20,8 +19,6 @@ class _QuestionPageState extends State<QuestionPage> {
   var currentQuestionIndex = 0;
   var questionBankState = QuestionBankState.notLoaded;
   List<Question> questions = [];
-
-  var buttonState = ButtonState.check;
 
   @override
   void initState() {
@@ -52,6 +49,17 @@ class _QuestionPageState extends State<QuestionPage> {
         questionBankState = QuestionBankState.failed;
       });
     });
+  }
+
+  void onNextClicked() {
+    if (currentQuestionIndex < questions.length - 1) {
+      setState(() {
+        currentQuestionIndex += 1;
+      });
+    } else {
+      // finished displaying the questions, show perhaps a pop up showing summary.
+      print('went through the questions');
+    }
   }
 
   @override
@@ -87,7 +95,7 @@ class _QuestionPageState extends State<QuestionPage> {
                       children: <Widget>[
                         Score(
                           fullProgressCount: questions.length,
-                          progressCount: currentQuestionIndex,
+                          progressCount: currentQuestionIndex + 1,
                         ),
                         CountDownTimer(
                           countDownFromMin: 2,
@@ -97,40 +105,9 @@ class _QuestionPageState extends State<QuestionPage> {
                         ),
                         QuestionWidget(
                           question: questions[currentQuestionIndex],
+                          onNextClicked: this.onNextClicked,
                         )
                       ],
-                    ),
-                  ),
-                  FlatButton(
-                    color: buttonState == ButtonState.check
-                        ? Theme.of(context).primaryColor
-                        : Colors.lightGreen,
-                    onPressed: buttonState == ButtonState.check
-                        ? () {
-                            // check clicked
-                            setState(() {
-                              buttonState = ButtonState.proceed;
-                            });
-                          }
-                        : () {
-                            // continue clicked
-                            setState(() {
-                              if (currentQuestionIndex ==
-                                  questions.length - 1) {
-                                // dummy-implementation, perhaps a popup here
-                                currentQuestionIndex = 0;
-                                buttonState = ButtonState.check;
-                              } else {
-                                this.currentQuestionIndex += 1;
-                                buttonState = ButtonState.check;
-                              }
-                            });
-                          },
-                    textColor: Colors.white,
-                    child: Center(
-                      child: buttonState == ButtonState.check
-                          ? Text('Check')
-                          : Text('Continue'),
                     ),
                   ),
                 ],
