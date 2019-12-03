@@ -1,17 +1,45 @@
 import 'package:scoped_model/scoped_model.dart';
+import 'package:http/http.dart' as http;
 
 import '../models/question.dart';
 
 enum QuestionBankState { notLoaded, loaded, failed }
 
 class QuestionModel extends Model {
-  List<Question> _questions = [];
+  Map<String, List<Question>> _questions = {};
   var _currentQuestionIndex = 0;
 
   var questionBankState = QuestionBankState.notLoaded;
+  Future _questionFetcher;
+  String _selectedCategory;
+
+  Future getQuestionFetcher() => http
+      .get('https://mobile-development-52de3.firebaseio.com/questions.json');
+
+  Future get questionFetcher {
+    if (_questionFetcher == null) {
+      _questionFetcher = getQuestionFetcher();
+    }
+    return _questionFetcher;
+  }
+
+  set selectedCategory(String category) {
+    if (_selectedCategory != category) {
+      _selectedCategory = category;
+      _questionFetcher = getQuestionFetcher();
+      questionBankState = QuestionBankState.notLoaded;
+      notifyListeners();
+    }
+  }
+
+  renewQuestionFetcher() {
+    _questionFetcher = http
+        .get('https://mobile-development-52de3.firebaseio.com/questions.json');
+    notifyListeners();
+  }
 
   int get numberOfQuestions {
-    return _questions.length;
+    return _questions[_selectedCategory].length;
   }
 
   int get currentQuestionIndex {
@@ -19,7 +47,7 @@ class QuestionModel extends Model {
   }
 
   Question get currentQuestion {
-    return _questions[_currentQuestionIndex];
+    return _questions[_selectedCategory][_currentQuestionIndex];
   }
 
   void incrementQuestionIndex() {
@@ -33,8 +61,12 @@ class QuestionModel extends Model {
   }
 
   void addQuestions(List<Question> questions) {
+    if (!_questions.containsKey(_selectedCategory)) {
+      _questions[_selectedCategory] = [];
+    }
+
     for (var question in questions) {
-      _questions.add(question);
+      _questions[_selectedCategory].add(question);
     }
     questionBankState = QuestionBankState.loaded;
   }

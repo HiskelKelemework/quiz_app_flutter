@@ -11,6 +11,9 @@ import '../widgets/question.dart';
 import '../models/question.dart';
 
 class QuestionPage extends StatefulWidget {
+  final String questionType;
+  QuestionPage(this.questionType);
+
   @override
   _QuestionPageState createState() => _QuestionPageState();
 }
@@ -18,19 +21,6 @@ class QuestionPage extends StatefulWidget {
 class _QuestionPageState extends State<QuestionPage> {
   var timeMin = 0;
   var timeSec = 10;
-
-  Future _questionFetcher;
-
-  @override
-  void initState() {
-    _questionFetcher = _loadQuestions();
-    super.initState();
-  }
-
-  Future _loadQuestions() {
-    return http
-        .get('https://mobile-development-52de3.firebaseio.com/questions.json');
-  }
 
   void onNextClicked(QuestionModel model) {
     if (model.currentQuestionIndex < model.numberOfQuestions - 1) {
@@ -103,15 +93,13 @@ class _QuestionPageState extends State<QuestionPage> {
     );
   }
 
-  Widget _buildRetry() {
+  Widget _buildRetry(Function renewFetcher) {
     return Center(
       child: FlatButton(
         color: Colors.blue,
         child: Text('Retry'),
         onPressed: () {
-          setState(() {
-            _questionFetcher = _loadQuestions();
-          });
+          renewFetcher();
         },
       ),
     );
@@ -145,7 +133,7 @@ class _QuestionPageState extends State<QuestionPage> {
         rebuildOnChange: true,
         builder: (BuildContext context, Widget child, QuestionModel model) {
           return FutureBuilder<dynamic>(
-            future: _questionFetcher,
+            future: model.questionFetcher,
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.none:
@@ -156,7 +144,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 case ConnectionState.done:
                   if (snapshot.hasError) {
                     print(snapshot.error);
-                    return _buildRetry();
+                    return _buildRetry(model.renewQuestionFetcher);
                   }
 
                   // only add the questions once.
@@ -175,7 +163,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
                   return _buildQuestions(model);
               }
-              return null;
+              return null; // will never reach here
             },
           );
         },

@@ -61,6 +61,13 @@ class _QuestionState extends State<QuestionWidget> {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
+                        if (!widget.question.isMultipleChoice) {
+                          for (var k in optionsState.keys) {
+                            if (k != index) {
+                              optionsState[k] = false;
+                            }
+                          }
+                        }
                         optionsState[index] = !optionsState[index];
                       });
                     },
