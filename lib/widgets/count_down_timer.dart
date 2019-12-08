@@ -1,7 +1,9 @@
+import 'package:firebase_realtime_trial/providers/tick_provider.dart';
 import 'package:flutter/cupertino.dart';
-import 'dart:async';
 
-class CountDownTimer extends StatefulWidget {
+import 'package:provider/provider.dart';
+
+class CountDownTimer extends StatelessWidget {
   final int countDownFromMin;
   final int countDownFromSec;
 
@@ -20,56 +22,35 @@ class CountDownTimer extends StatefulWidget {
     this.bgColor,
   });
 
-  @override
-  _CountDownTimerState createState() =>
-      _CountDownTimerState(min: countDownFromMin, sec: countDownFromSec);
-}
-
-class _CountDownTimerState extends State<CountDownTimer> {
-  int min, sec;
-  _CountDownTimerState({this.min, this.sec});
-
-  Timer _timer;
-
-  @override
-  void initState() {
-    _startTimer();
-    super.initState();
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          sec -= 1;
-
-          if (sec == 0 && min == 0) {
-            _timer.cancel();
-            // callback here if needed
-            widget.onCountDownFinish();
-          }
-
-          if (sec == -1 && min > 0) {
-            sec = 59;
-            min -= 1;
-          }
-        });
-      }
-    });
-  }
+  onCountDownReachedZero() {}
 
   @override
   Widget build(BuildContext context) {
-    var time = "${(min < 10) ? '0$min' : min}:${(sec < 10) ? '0$sec' : sec}";
-    return Container(
-      padding: EdgeInsets.all(8),
-      color: widget.bgColor,
-      decoration: widget.boxDecoration,
-      child: Center(
-        child: Text(
-          time,
-          style: widget.textStyle,
-        ),
+    return ChangeNotifierProvider(
+      create: (ctxt) => TickProvider(countDownFromMin, countDownFromSec,
+          (Function resetTimer) {
+        onCountDownFinish(resetTimer);
+      }),
+      child: Consumer<TickProvider>(
+        builder: (context, model, child) {
+          final min = model.min;
+          final sec = model.sec;
+
+          var time =
+              "${(min < 10) ? '0$min' : min}:${(model.sec < 10) ? '0$sec' : sec}";
+
+          return Container(
+            padding: EdgeInsets.all(8),
+            color: bgColor,
+            decoration: boxDecoration,
+            child: Center(
+              child: Text(
+                time,
+                style: textStyle,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

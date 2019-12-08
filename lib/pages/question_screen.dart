@@ -1,7 +1,7 @@
-import 'package:firebase_realtime_trial/scoped-models/question_model.dart';
+import 'package:firebase_realtime_trial/providers/question_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:scoped_model/scoped_model.dart';
+import 'package:provider/provider.dart';
 import 'dart:convert';
 
 import '../widgets/score.dart';
@@ -9,6 +9,7 @@ import '../widgets/count_down_timer.dart';
 import '../widgets/question.dart';
 
 import '../models/question.dart';
+import '../providers/tick_provider.dart';
 
 class QuestionPage extends StatefulWidget {
   final String questionType;
@@ -31,9 +32,10 @@ class _QuestionPageState extends State<QuestionPage> {
     }
   }
 
-  void onCountDownFinish(Function resetQuestionIndex) {
+  void onCountDownFinish(Function resetQuestionIndex, Function resetTicker) {
     showDialog<void>(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Time is up!'),
@@ -48,10 +50,7 @@ class _QuestionPageState extends State<QuestionPage> {
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();
                 resetQuestionIndex();
-                setState(() {
-                  timeMin = 0;
-                  timeSec = 10;
-                });
+                resetTicker();
               },
             ),
           ],
@@ -60,7 +59,7 @@ class _QuestionPageState extends State<QuestionPage> {
     );
   }
 
-  Widget _buildQuestions(QuestionModel model) {
+  Widget _buildQuestions(QuestionModel qModel) {
     return Container(
       padding: const EdgeInsets.only(top: 32, bottom: 32, left: 8, right: 8),
       child: Column(
@@ -71,19 +70,19 @@ class _QuestionPageState extends State<QuestionPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Score(
-                  fullProgressCount: model.numberOfQuestions,
-                  progressCount: model.currentQuestionIndex + 1,
+                  fullProgressCount: qModel.numberOfQuestions,
+                  progressCount: qModel.currentQuestionIndex + 1,
                 ),
                 CountDownTimer(
-                  countDownFromMin: timeMin,
-                  countDownFromSec: timeSec,
-                  textStyle: TextStyle(fontSize: 20),
-                  onCountDownFinish: () =>
-                      this.onCountDownFinish(model.resetQuestionIndex),
-                ),
+                    countDownFromMin: timeMin,
+                    countDownFromSec: timeSec,
+                    textStyle: TextStyle(fontSize: 20),
+                    onCountDownFinish: (Function resetTicker) => this
+                        .onCountDownFinish(
+                            qModel.resetQuestionIndex, resetTicker)),
                 QuestionWidget(
-                  question: model.currentQuestion,
-                  onNextClicked: () => this.onNextClicked(model),
+                  question: qModel.currentQuestion,
+                  onNextClicked: () => this.onNextClicked(qModel),
                 )
               ],
             ),
@@ -129,9 +128,8 @@ class _QuestionPageState extends State<QuestionPage> {
       appBar: AppBar(
         title: Text('Quiz'),
       ),
-      body: ScopedModelDescendant<QuestionModel>(
-        rebuildOnChange: true,
-        builder: (BuildContext context, Widget child, QuestionModel model) {
+      body: Consumer<QuestionModel>(
+        builder: (context, model, child) {
           return FutureBuilder<dynamic>(
             future: model.questionFetcher,
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {

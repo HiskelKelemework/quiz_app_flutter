@@ -1,11 +1,11 @@
-import 'package:scoped_model/scoped_model.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/question.dart';
 
 enum QuestionBankState { notLoaded, loaded, failed }
 
-class QuestionModel extends Model {
+class QuestionModel extends ChangeNotifier {
   Map<String, List<Question>> _questions = {};
   var _currentQuestionIndex = 0;
 

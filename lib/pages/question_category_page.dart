@@ -1,7 +1,7 @@
 import 'package:firebase_realtime_trial/pages/question_screen.dart';
-import 'package:firebase_realtime_trial/scoped-models/question_model.dart';
+import 'package:firebase_realtime_trial/providers/question_model.dart';
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
+import 'package:provider/provider.dart';
 
 class QuestionCategory extends StatelessWidget {
   final _categories = [
@@ -16,8 +16,8 @@ class QuestionCategory extends StatelessWidget {
   Widget build(BuildContext context) {
     final textStyle = TextStyle(color: Colors.white, fontSize: 25);
 
-    return ScopedModelDescendant<QuestionModel>(
-      builder: (context, child, model) {
+    return Consumer<QuestionModel>(
+      builder: (context, model, child) {
         return Scaffold(
           appBar: AppBar(
             title: Text('Categories'),
